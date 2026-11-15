@@ -30,6 +30,8 @@ install: all
 	bash tools/install.sh $(BUILD)
 $(BUILD)/native_test: tests/native_test.cpp $(filter-out $(BUILD)/App.o,$(OBJECTS))
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ $(LDFLAGS) $(LDLIBS) -o $@
+$(BUILD)/layout_test: tests/layout_test.cpp $(BUILD)/Render.o $(BUILD)/Weather.o $(BUILD)/Json.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ $(LDFLAGS) -lbe -ltranslation -o $@
 check-native: $(BUILD)/native_test
 	$(BUILD)/native_test
 $(BUILD)/workflow_test: tests/workflow_test.cpp

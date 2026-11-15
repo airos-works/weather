@@ -3,13 +3,15 @@
 A native weather app for air/OS and Haiku, with a Dark Sky inspired focus on
 what is happening now and what comes next. No account, subscription or API key.
 
-![Weather running on air/OS](docs/screenshots/weather-window.png)
+![Weather running on air/OS](docs/screenshots/weather-live-light.png)
 
 - Current temperature, feels-like temperature, conditions, wind, humidity and pressure.
 - Two-hour precipitation chart in 15-minute intervals, 24-hour temperature and
   precipitation-probability chart, and seven-day forecast.
 - Permission-based approximate location, city/postal-code search with region
   disambiguation, up to 50 saved locations, and Celsius/Fahrenheit units.
+- Responsive cards that stack in narrow windows, with scrolling when needed.
+- Light and dark appearance follows Screen preferences and updates immediately.
 - A dedicated auxiliary-display layout with large type and only essential data.
 - Background HTTPS requests, ten-minute refreshes, saved last forecast, and
   explicit unavailable/offline/stale states. Unknown values are never shown as zero.
@@ -100,7 +102,7 @@ supports an SSH-accessible Pi and leaves starting the panel explicit.
 ## Data and limits
 
 [Open-Meteo](https://open-meteo.com/en/docs) supplies forecasts; its geocoding API
-uses GeoNames. Attribution is included in the app and About dialog. Weather data
+uses GeoNames. Attribution is included in the About dialog. Weather data
 is CC BY 4.0. The free hosted API permits personal/non-commercial use within its
 [usage limits](https://open-meteo.com/en/terms). Weather needs no paid key for that
 use. Commercial distribution needs a provider arrangement or a different backend.
@@ -126,6 +128,7 @@ on a successful weather request.
 ```sh
 make check-host                 # portable parser/forecast tests with ASan + UBSan
 make check-native               # settings and native bitmap rendering on air/OS
+make build/layout_test && build/layout_test --theme # live resize/theme regression
 build/native_test --live        # additionally fetch live forecasts and city search
 hey Weather get WeatherState   # read-only runtime state for validation
 ```

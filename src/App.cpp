@@ -52,24 +52,18 @@ public:
         auto locate=new BButton("My location",new BMessage(kLocate));locate->SetTarget(be_app);
         auto refresh=new BButton("Refresh",new BMessage(kRefresh));refresh->SetTarget(be_app);
         panelLabel=new BStringView("panel status","");
+        panelLabel->SetExplicitMinSize(BSize(0,B_SIZE_UNSET));
+        panelLabel->SetExplicitMaxSize(BSize(200,B_SIZE_UNLIMITED));
         canvas=new WeatherView(art);
         scroll=new BScrollView("forecast scroll",canvas,0,false,true,B_NO_BORDER);
-        scroll->SetExplicitMinSize(BSize(820,400));
         BLayoutBuilder::Group<>(this,B_VERTICAL,0).Add(menus)
             .AddGroup(B_HORIZONTAL,8).SetInsets(12,8,12,8).Add(places).Add(locate).AddGlue().Add(panelLabel).Add(refresh).End().Add(scroll);
     }
     bool QuitRequested() override { be_app->PostMessage(kClosed);return false; }
-    void FrameResized(float,float) override { SizeCanvas(); }
-    void SizeCanvas() {
-        if (!scroll) return;
-        float width=scroll->Bounds().Width()-B_V_SCROLL_BAR_WIDTH;
-        float height=scroll->Bounds().Height();canvas->ResizeTo(width,std::max(840.0f,height));
-        auto bar=scroll->ScrollBar(B_VERTICAL);bar->SetRange(0,std::max(0.0f,840-height));bar->SetProportion(std::min(1.0f,height/840));bar->SetSteps(36,height*.8f);
-    }
     void Update(const ScreenState& state,bool enabled) {
         if (!Lock()) return;
         canvas->SetState(state);units->SetMarked(state.fahrenheit);panel->SetMarked(enabled);
-        panelLabel->SetText(state.panelStatus.c_str());SizeCanvas();Unlock();
+        panelLabel->SetText(state.panelStatus.c_str());panelLabel->SetToolTip(state.panelStatus.c_str());Unlock();
     }
     WeatherView* canvas=nullptr;BScrollView* scroll=nullptr;BMenuItem *units,*panel;BStringView* panelLabel;
 };
@@ -159,6 +153,7 @@ public:
     }
     void MessageReceived(BMessage* m) override {
         switch(m->what) {
+            case B_COLORS_UPDATED:BApplication::MessageReceived(m);Publish();break;
             case B_SILENT_RELAUNCH:if(ready)OpenWindow();break;
             case kLocate:Locate(true);break;
             case kLocations:OpenLocations();break;
@@ -186,6 +181,14 @@ public:
                     reply.AddBool("stale",Stale(state.forecast,time(nullptr)));reply.AddDouble("temperature",state.forecast.temperature);
                     reply.AddInt64("location_requests",locationRequests);reply.AddInt64("forecast_requests",forecastRequests);
                     reply.AddBool("fahrenheit",settings.fahrenheit);reply.AddInt32("search_results",found.size());
+                    reply.AddBool("dark_mode",SystemPalette().dark);
+                    if(window && window->Lock()){
+                        reply.AddRect("viewport",window->canvas->Frame());
+                        reply.AddRect("visible_content",window->canvas->Bounds());
+                        reply.AddBool("stacked",window->canvas->Layout().stacked);
+                        reply.AddFloat("content_height",window->canvas->Layout().height);
+                        window->Unlock();
+                    }
                     reply.AddBool("isolated_settings",getenv("WEATHER_SETTINGS_DIR")!=nullptr);
                     reply.AddInt32("saved_locations",settings.locations.size());reply.AddBool("panel",display.InitCheck()==B_OK);
                     reply.AddInt64("panel_frames",panelFrames);reply.AddString("panel_status",state.panelStatus.c_str());

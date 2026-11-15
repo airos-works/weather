@@ -90,3 +90,37 @@ app. It expects one saved Hobart location and no location permission. It leaves
 one saved Hobart location, Celsius units, and permission revoked. Native settings
 tests use their own temporary directory and preserve simulated corrupt data until
 the test explicitly cleans it up.
+
+## Responsive layout and appearance update (beta1-3)
+
+- Fixed resize artifacts by repainting the complete forecast view after its
+  dimensions change, and leaving viewport sizing to the native scroll layout.
+- `build/layout_test --theme` passed on the user's x86_64 desktop. It exercises
+  21 width/height combinations (420–1400 wide, 320–1100 high), compares the visible
+  pixels after each resize against a forced full repaint, checks the narrow
+  breakpoint, and scrolls to the bottom before expanding and checking clamping.
+- The same test switches the actual Screen light/dark flag, observes native
+  color-change notifications and redraws, checks visible background pixels,
+  and restores the original preference. It uses a separate application signature
+  and forecast fixture without touching Weather settings or making network calls.
+- Visually inspected [light](screenshots/weather-live-light.png),
+  [dark](screenshots/weather-live-dark.png), and
+  [narrow](screenshots/weather-narrow-light.png) rendering. Cards stack below 800
+  viewport units, grow with taller windows, and retain scroll access at small sizes.
+  Attribution and model-guidance text remain in About instead of the main canvas.
+- Native settings/rendering tests pass with additional light/dark and narrow
+  snapshots on both the x86_64 desktop and the Raspberry Pi. Portable ASan/UBSan
+  checks and the ARM64 cross-build also pass.
+- Installed beta1-3 on both machines; each installed executable hash matches its
+  tested build. The desktop shortcut opens the new app, the desktop retained its
+  three saved locations, and the Pi retained its selected city and active Waveshare
+  panel. Appearance preference, location consent and window position were preserved.
+
+To repeat the live window test on an air/OS desktop with room for a 1400×1100
+window:
+
+```sh
+make build/layout_test
+build/layout_test          # resizing and scrolling only
+build/layout_test --theme  # also switches and restores Screen appearance
+```

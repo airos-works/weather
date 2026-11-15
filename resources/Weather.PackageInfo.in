@@ -1,5 +1,5 @@
 name weather
-version 1.0.0~beta1-2
+version 1.0.0~beta1-3
 architecture @ARCH@
 summary "Weather for air/OS"
 description "Native forecasts, permission-based approximate location, saved cities, hourly and daily outlooks, and a readable auxiliary display. Uses free Open-Meteo services for personal/non-commercial use. Requires air/OS with BAuxDisplay support."

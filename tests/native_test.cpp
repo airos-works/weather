@@ -2,6 +2,7 @@
 #include "Settings.h"
 #include "Network.h"
 #include <Application.h>
+#include <Path.h>
 #include <BitmapStream.h>
 #include <File.h>
 #include <TranslatorRoster.h>
@@ -12,10 +13,10 @@
 #include <unistd.h>
 #include <sys/stat.h>
 using namespace weather;
-void Render(const char* path,int w,int h,const ScreenState& s,const Artwork& art,bool compact){
+void Render(const char* path,int w,int h,const ScreenState& s,const Artwork& art,bool compact,bool dark=false){
     auto b=new BBitmap(BRect(0,0,w-1,h-1),B_BITMAP_ACCEPTS_VIEWS,B_RGB32);
     assert(b->InitCheck()==B_OK);auto v=new BView(b->Bounds(),"test",B_FOLLOW_NONE,0);b->AddChild(v);
-    assert(b->Lock());DrawWeather(v,b->Bounds(),s,art,compact,s.forecast.currentTime);v->Sync();b->Unlock();
+    assert(b->Lock());DrawWeather(v,b->Bounds(),s,art,compact,s.forecast.currentTime,PaletteFor(dark));v->Sync();b->Unlock();
     BBitmapStream input(b);BFile output(path,B_WRITE_ONLY|B_CREATE_FILE|B_ERASE_FILE);
     assert(BTranslatorRoster::Default()->Translate(&input,nullptr,nullptr,&output,B_PNG_FORMAT)==B_OK);
 }
@@ -34,8 +35,12 @@ int main(int argc,char** argv){
     unlink((dir+"/settings").c_str());rmdir(dir.c_str());
     std::ifstream fixture("tests/forecast.json");std::string body((std::istreambuf_iterator<char>(fixture)),{});
     ScreenState state;assert(ParseForecast(body,state.forecast,error));state.forecast.fetched=state.forecast.currentTime;
-    state.location={"Hobart, Tasmania",-42.88,147.33,false};Artwork art("resources/icons");assert(art.Get(0)!=nullptr);
+    state.location={"Hobart, Tasmania",-42.88,147.33,false};Artwork art(BPath("resources/icons").Path());assert(art.Get(0)!=nullptr);
     Render("/tmp/weather-desktop.png",980,840,state,art,false);
+    Render("/tmp/weather-desktop-dark.png",980,840,state,art,false,true);
+    Render("/tmp/weather-narrow-light.png",420,1200,state,art,false);
+    Render("/tmp/weather-narrow-dark.png",420,1200,state,art,false,true);
+    Render("/tmp/weather-panel-dark.png",640,480,state,art,true,true);
     Render("/tmp/weather-panel.png",800,480,state,art,true);
     Render("/tmp/weather-panel-small.png",480,320,state,art,true);
     state.forecast.fetched-=7200;Render("/tmp/weather-panel-stale.png",800,480,state,art,true);
