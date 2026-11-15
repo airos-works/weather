@@ -1,0 +1,16 @@
+name weather
+version 1.0.0~beta1-1
+architecture @ARCH@
+summary "Weather for air/OS"
+description "Native forecasts, permission-based approximate location, saved cities, hourly and daily outlooks, and a readable auxiliary display. Uses free Open-Meteo services for personal/non-commercial use. Requires air/OS with BAuxDisplay support."
+packager "air/OS contributors"
+vendor "air/OS"
+copyrights { "2026 air/OS contributors" }
+licenses { "MIT" }
+provides {
+    weather = 1.0.0~beta1
+    app:Weather = 1.0.0~beta1
+}
+requires {
+    haiku >= r1~beta5
+}
