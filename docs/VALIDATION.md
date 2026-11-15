@@ -38,27 +38,38 @@ The live tests deliberately use Hobart and London as test locations; they do not
 infer the operator's location. The IP-location success response is covered by
 parser tests; live permission approval has not been granted on the user's behalf.
 
-## Outstanding hardware verification
+## Raspberry Pi 4 / Waveshare DSI
 
-The physical Raspberry Pi 4 / Waveshare DSI path remains **unverified**. The known
-network and console access methods were unavailable during this session. Native
-offscreen rendering and a successful ARM64 link do not prove presentation on the
-actual panel.
+After receiving the updated MCP connection details, hardware validation passed on
+the actual Raspberry Pi 4 (air/OS arm64, hrev60207+2692):
 
-Once the Pi is reachable:
+- Installed the ARM64 `.hpkg` through the native package manager. Its plan touched
+  only Weather. AirTop was quit normally to release the screen; boot settings and
+  drivers were left unchanged.
+- The driver identifies **Waveshare 3.5-inch DSI LCD (E), 640×480**, RGB32,
+  2560-byte stride, two 1,228,800-byte buffers, approximately 60 Hz.
+- `Weather --panel` fetched live Hobart weather. Scripting reported `valid=true`,
+  `stale=false`, `panel=true`, the correct display name and advancing frame counts
+  (3 initially, 25 after workflow exercises).
+- Captured the driver's **currently shown buffer**, using its read-only dump
+  operation, and decoded the BGRA pixels into
+  [weather-pi-dsi.png](screenshots/weather-pi-dsi.png). Inspected the 640×480 result:
+  large temperature and condition, daily range/feels-like, and one precipitation
+  summary, without the desktop charts and tables.
+- Ran the same native settings/render tests and live workflow tests on the Pi.
+  Both passed. This includes 168-hour forecast retrieval, ten city search matches,
+  adding/switching/removing locations, unit changes, rapid selection, refresh
+  limiting, corrupt-file preservation, and stale-data rendering.
+- Found and fixed the panel-only application's handling of `B_SILENT_RELAUNCH`.
+  Relaunch through the registrar then opened one desktop window; closing it left
+  zero desktop windows with `panel=true` and advancing frames.
+- While Weather was presenting, driver flags were `0x19` (including the powered-on
+  bit). After a normal Quit, the job exited with status 0 and flags returned to
+  `0x09`, confirming panel power-off.
 
-1. Build/package the current source with `tools/build-arm64.sh` and `tools/package.sh`.
-2. Install Weather on the Pi, preserving its existing apps and startup settings.
-3. Confirm the DSI device and its dimensions. Release AirTop's auxiliary display
-   before launching Weather, without changing unrelated system services.
-4. Configure an explicit test city or let the user grant location permission.
-5. Run `Weather --panel`, verify live data and increasing `panel_frames` via
-   `hey Weather get WeatherState`, and inspect the physical panel/captured buffer.
-6. Verify large text at the panel's actual dimensions, window closure with the panel
-   continuing, desktop relaunch, location switching, stale presentation, and display
-   power-off when the panel is disabled or Weather quits.
-
-The complete goal should remain open until these checks pass.
+The hardware tests used `/tmp/weather-dsi-validation` for app settings, preserving
+first-launch consent in the normal user settings. No live IP-location request was
+made on the user's behalf during these tests.
 
 ## Repeating native workflow tests
 

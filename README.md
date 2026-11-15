@@ -66,7 +66,7 @@ Weather has no analytics, advertising or account system.
 
 ## Small external displays
 
-![800×480 auxiliary-display renderer](docs/screenshots/weather-panel.png)
+![Captured from the Pi’s 640×480 Waveshare DSI display](docs/screenshots/weather-pi-dsi.png)
 
 **View → Show on auxiliary display** opens the first local `/dev/auxdisplay`
 device through air/OS's `BAuxDisplay` Device Kit API, the same interface used by

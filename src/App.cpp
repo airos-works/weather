@@ -159,6 +159,7 @@ public:
     }
     void MessageReceived(BMessage* m) override {
         switch(m->what) {
+            case B_SILENT_RELAUNCH:if(ready)OpenWindow();break;
             case kLocate:Locate(true);break;
             case kLocations:OpenLocations();break;
             case kLocationClosed:if(locations && locations->Lock()){locations->Quit();locations=nullptr;}break;

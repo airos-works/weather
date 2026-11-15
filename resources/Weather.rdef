@@ -3,7 +3,7 @@ resource large_icon { import "Weather-icon32.raw" };
 resource mini_icon { import "Weather-icon16.raw" };
 resource app_flags B_SINGLE_LAUNCH;
 resource app_version {
-    major = 1, middle = 0, minor = 0, variety = B_APPV_BETA, internal = 1,
+    major = 1, middle = 0, minor = 0, variety = B_APPV_BETA, internal = 2,
     short_info = "Weather for air/OS",
     long_info = "Local forecasts and a readable auxiliary display. Weather data by Open-Meteo."
 };
