@@ -24,8 +24,10 @@ int main(int argc,char** argv){
     std::string dir="/tmp/weather-test-"+std::to_string(getpid());mkdir(dir.c_str(),0700);setenv("WEATHER_SETTINGS_DIR",dir.c_str(),1);
     Settings s;std::string error;assert(s.Load(error));assert(!s.consent && !s.asked && s.selected==-1);
     s.locations.push_back({"Hobart",-42.88,147.33,false});s.selected=0;s.consent=true;s.asked=true;s.follow=true;s.fahrenheit=true;
+    s.cachedBody="{\"cached\":true}";s.cachedKey=s.locations[0].Key();s.cachedAt=1794724000;
     assert(s.Save(error));Settings copy;assert(copy.Load(error));assert(copy.consent && copy.follow && copy.fahrenheit && copy.locations.size()==1);
     assert(copy.locations[0].name=="Hobart");
+    assert(copy.cachedBody==s.cachedBody && copy.cachedKey==s.cachedKey && copy.cachedAt==s.cachedAt);
     {std::ofstream bad(dir+"/settings");bad<<"broken settings";}
     Settings broken;assert(!broken.Load(error));assert(!broken.Save(error));
     {std::ifstream check(dir+"/settings");std::string text;getline(check,text);assert(text=="broken settings");}
